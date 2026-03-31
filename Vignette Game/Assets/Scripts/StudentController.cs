@@ -30,10 +30,6 @@ public class StudentController : MonoBehaviour
     [Header("Caught Color")]
     public float caughtColorFadeDuration = 0.8f;
 
-    [Header("Sprites")]
-    public Sprite normalSprite;   // 平时
-    public Sprite cheatingSprite; // 只要按键就切这个
-
     private GameManager gameManager;
     private SpriteRenderer sr;
     private Coroutine fadeCoroutine;
@@ -41,12 +37,7 @@ public class StudentController : MonoBehaviour
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
-
         sr = GetComponent<SpriteRenderer>();
-        if (sr != null && normalSprite != null)
-        {
-            sr.sprite = normalSprite;
-        }
 
         if (progressBar != null)
         {
@@ -62,7 +53,6 @@ public class StudentController : MonoBehaviour
 
         HandleInputAndProgress();
         UpdateUI();
-        UpdateVisualStyle();
         CheckFinished();
     }
 
@@ -99,13 +89,13 @@ public class StudentController : MonoBehaviour
         switch (studentID)
         {
             case 1:
-                return Keyboard.current.digit1Key.isPressed || Keyboard.current.numpad1Key.isPressed;
+                return Keyboard.current.aKey.isPressed;
             case 2:
-                return Keyboard.current.digit2Key.isPressed || Keyboard.current.numpad2Key.isPressed;
+                return Keyboard.current.sKey.isPressed;
             case 3:
-                return Keyboard.current.digit3Key.isPressed || Keyboard.current.numpad3Key.isPressed;
+                return Keyboard.current.kKey.isPressed;
             case 4:
-                return Keyboard.current.digit4Key.isPressed || Keyboard.current.numpad4Key.isPressed;
+                return Keyboard.current.lKey.isPressed;
             default:
                 return false;
         }
@@ -119,35 +109,12 @@ public class StudentController : MonoBehaviour
         }
     }
 
-    void UpdateVisualStyle()
-    {
-        if (sr == null) return;
-        if (isCaught) return;
-
-        bool myKeyPressed = IsPressingOwnKey();
-
-        if (myKeyPressed)
-        {
-            if (cheatingSprite != null)
-                sr.sprite = cheatingSprite;
-        }
-        else
-        {
-            if (normalSprite != null)
-                sr.sprite = normalSprite;
-        }
-    }
-
     void CheckFinished()
     {
         if (progress >= maxProgress)
         {
             isFinished = true;
             currentAction = StudentAction.Finished;
-
-            if (sr != null && normalSprite != null)
-                sr.sprite = normalSprite;
-
             gameManager.CheckAllFinished();
         }
     }
