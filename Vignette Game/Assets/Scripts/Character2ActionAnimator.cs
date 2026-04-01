@@ -25,6 +25,15 @@ public class CopyStudentActionAnimator : MonoBehaviour
     public Sprite[] writingFrames;
     public Sprite[] cheatingFrames;
 
+    [Header("End State Sprites")]
+    public Sprite celebrateSprite;
+    public Sprite sadSprite;
+
+    [Header("Scale")]
+    public Vector3 normalScale = Vector3.one;
+    public Vector3 celebrateScale = Vector3.one;
+    public Vector3 sadScale = Vector3.one;
+
     [Header("Frame Rates")]
     public float writingFrameRate = 4f;
     public float cheatingFrameRate = 10f;
@@ -33,7 +42,6 @@ public class CopyStudentActionAnimator : MonoBehaviour
     public StudentController studentController;
 
     private SpriteRenderer sr;
-
     private AnimState activeState = AnimState.Writing;
     private int currentFrame = 0;
     private float timer = 0f;
@@ -49,6 +57,7 @@ public class CopyStudentActionAnimator : MonoBehaviour
 
     void Start()
     {
+        transform.localScale = normalScale;
         SetFirstWritingFrame();
     }
 
@@ -56,8 +65,25 @@ public class CopyStudentActionAnimator : MonoBehaviour
     {
         if (sr == null) return;
 
-        if (studentController != null && (studentController.isCaught || studentController.isFinished))
-            return;
+        // 只有真正进入结局表情时才锁住
+        if (studentController != null)
+        {
+            if (studentController.showSad)
+            {
+                if (sadSprite != null) sr.sprite = sadSprite;
+                transform.localScale = sadScale;
+                return;
+            }
+
+            if (studentController.showCelebrate)
+            {
+                if (celebrateSprite != null) sr.sprite = celebrateSprite;
+                transform.localScale = celebrateScale;
+                return;
+            }
+        }
+
+        transform.localScale = normalScale;
 
         bool selfPressed = IsKeyPressed(selfKey);
         AnimState targetState = selfPressed ? AnimState.Cheating : AnimState.Writing;
@@ -84,11 +110,7 @@ public class CopyStudentActionAnimator : MonoBehaviour
     {
         if (targetState == AnimState.Writing)
         {
-            if (activeState != AnimState.Writing)
-                isReversing = true;
-            else
-                isReversing = false;
-
+            isReversing = activeState != AnimState.Writing;
             return;
         }
 
@@ -110,7 +132,7 @@ public class CopyStudentActionAnimator : MonoBehaviour
         Sprite[] frames = GetCurrentFrames();
         if (frames == null || frames.Length == 0) return;
 
-        float fps = (activeState == AnimState.Writing) ? writingFrameRate : cheatingFrameRate;
+        float fps = activeState == AnimState.Writing ? writingFrameRate : cheatingFrameRate;
         float frameDuration = 1f / fps;
 
         timer += Time.deltaTime;
@@ -119,10 +141,7 @@ public class CopyStudentActionAnimator : MonoBehaviour
 
         if (activeState == AnimState.Writing)
         {
-            currentFrame++;
-            if (currentFrame >= frames.Length)
-                currentFrame = 0;
-
+            currentFrame = (currentFrame + 1) % frames.Length;
             ApplyCurrentFrame();
             return;
         }
@@ -130,15 +149,9 @@ public class CopyStudentActionAnimator : MonoBehaviour
         if (!isReversing)
         {
             if (currentFrame < frames.Length - 1)
-            {
                 currentFrame++;
-                ApplyCurrentFrame();
-            }
-            else
-            {
-                currentFrame = frames.Length - 1;
-                ApplyCurrentFrame();
-            }
+
+            ApplyCurrentFrame();
         }
         else
         {
@@ -162,12 +175,9 @@ public class CopyStudentActionAnimator : MonoBehaviour
     {
         switch (activeState)
         {
-            case AnimState.Writing:
-                return writingFrames;
-            case AnimState.Cheating:
-                return cheatingFrames;
-            default:
-                return null;
+            case AnimState.Writing: return writingFrames;
+            case AnimState.Cheating: return cheatingFrames;
+            default: return null;
         }
     }
 

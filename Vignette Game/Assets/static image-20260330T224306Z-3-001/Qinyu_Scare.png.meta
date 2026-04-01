@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 65b6bb02bc9f22447b49395c6cd53633
+guid: 1c540a689ec47314ab2296074f40cd4b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7443756053782179069
-    second: background_0
+      213: 7200589136403372005
+    second: Qinyu_Scare_0
+  - first:
+      213: 8121792961546179945
+    second: Qinyu_Scare_1
+  - first:
+      213: -2774432444498137614
+    second: Qinyu_Scare_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,9 +52,9 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -75,7 +81,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,23 +119,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: background_0
+      name: Qinyu_Scare_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 211
         y: 0
-        width: 4157
-        height: 2339
+        width: 1626
+        height: 2048
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 30356abce4772b890800000000000000
-      internalID: -7443756053782179069
+      spriteID: 5e71cd05ba1ade360800000000000000
+      internalID: 7200589136403372005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Qinyu_Scare_1
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 1847
+        width: 122
+        height: 201
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9655a3cdaa766b070800000000000000
+      internalID: 8121792961546179945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Qinyu_Scare_2
+      rect:
+        serializedVersion: 2
+        x: 1539
+        y: 1800
+        width: 163
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fdae5c246c3f79d0800000000000000
+      internalID: -2774432444498137614
       vertices: []
       indices: 
       edges: []
@@ -138,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 31b091dcc784aa144bbc10ba698524d8
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      background_0: -7443756053782179069
+      Qinyu_Scare_0: 7200589136403372005
+      Qinyu_Scare_1: 8121792961546179945
+      Qinyu_Scare_2: -2774432444498137614
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

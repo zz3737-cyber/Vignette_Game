@@ -1,15 +1,18 @@
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class BackgroundFitCamera : MonoBehaviour
+public class BackgroundAutoFit : MonoBehaviour
 {
     public Camera targetCamera;
-    public bool fillScreen = true; // true = 铺满并允许裁边，false = 完整显示但可能留边
+
+    [Header("Fit")]
+    public bool fillScreen = true;     // true = 铺满并允许裁边
+    public float extraScale = 1.05f;   // 额外再放大一点，避免边露出来
+
+    [Header("Offset")]
+    public Vector2 worldOffset = Vector2.zero; // 用来手动微调背景位置
 
     private SpriteRenderer sr;
-    private float lastAspect = -1f;
-    private int lastScreenWidth = -1;
-    private int lastScreenHeight = -1;
 
     void Start()
     {
@@ -18,27 +21,15 @@ public class BackgroundFitCamera : MonoBehaviour
         if (targetCamera == null)
             targetCamera = Camera.main;
 
-        FitToCamera();
-        SaveScreenState();
+        FitNow();
     }
 
-    void Update()
+    void LateUpdate()
     {
-        if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight || targetCamera.aspect != lastAspect)
-        {
-            FitToCamera();
-            SaveScreenState();
-        }
+        FitNow();
     }
 
-    void SaveScreenState()
-    {
-        lastScreenWidth = Screen.width;
-        lastScreenHeight = Screen.height;
-        lastAspect = targetCamera != null ? targetCamera.aspect : -1f;
-    }
-
-    void FitToCamera()
+    void FitNow()
     {
         if (targetCamera == null || sr == null || sr.sprite == null) return;
 
@@ -51,7 +42,14 @@ public class BackgroundFitCamera : MonoBehaviour
         float scaleY = camHeight / spriteSize.y;
 
         float finalScale = fillScreen ? Mathf.Max(scaleX, scaleY) : Mathf.Min(scaleX, scaleY);
+        finalScale *= extraScale;
 
         transform.localScale = new Vector3(finalScale, finalScale, 1f);
+
+        transform.position = new Vector3(
+            targetCamera.transform.position.x + worldOffset.x,
+            targetCamera.transform.position.y + worldOffset.y,
+            0f
+        );
     }
 }

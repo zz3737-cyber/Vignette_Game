@@ -1,13 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using System.Collections;
 
 public class StudentController : MonoBehaviour
 {
     [Header("Basic Info")]
     public int studentID; // 1,2,3,4
-    public StudentAction currentAction = StudentAction.Idle;
+    public StudentAction currentAction = StudentAction.Writing;
 
     [Header("Progress")]
     public float progress = 0f;
@@ -23,21 +22,19 @@ public class StudentController : MonoBehaviour
     public bool isCopyStudent = false;  // 2 和 3
     public StudentController partner;   // 2对应1，3对应4
 
-    [Header("State")]
+    [Header("Logic State")]
     public bool isCaught = false;
     public bool isFinished = false;
 
-    [Header("Caught Color")]
-    public float caughtColorFadeDuration = 0.8f;
+    [Header("End Expression State")]
+    public bool showCelebrate = false;
+    public bool showSad = false;
 
     private GameManager gameManager;
-    private SpriteRenderer sr;
-    private Coroutine fadeCoroutine;
 
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
-        sr = GetComponent<SpriteRenderer>();
 
         if (progressBar != null)
         {
@@ -59,23 +56,47 @@ public class StudentController : MonoBehaviour
     void HandleInputAndProgress()
     {
         bool myKeyPressed = IsPressingOwnKey();
-        currentAction = StudentAction.Idle;
+        bool partnerKeyPressed = partner != null && partner.IsPressingOwnKey();
 
+        currentAction = StudentAction.Writing;
+
+        // 1 和 4
         if (isMainWriter)
         {
-            if (myKeyPressed)
+            // 同时按：帮助，不涨进度
+            if (myKeyPressed && partnerKeyPressed)
+            {
+                currentAction = StudentAction.Helping;
+            }
+            // 单独按：写字，涨进度
+            else if (myKeyPressed)
             {
                 currentAction = StudentAction.Writing;
                 progress += writeSpeed * Time.deltaTime;
             }
+            else
+            {
+                currentAction = StudentAction.Writing;
+            }
         }
 
+        // 2 和 3
         if (isCopyStudent)
         {
-            if (myKeyPressed && partner != null && partner.IsPressingOwnKey())
+            // 同时按：抄，涨进度
+            if (myKeyPressed && partnerKeyPressed)
             {
                 currentAction = StudentAction.Copying;
                 progress += copySpeed * Time.deltaTime;
+            }
+            // 单独按：抄动作，但不涨进度
+            else if (myKeyPressed)
+            {
+                currentAction = StudentAction.Copying;
+            }
+            else
+            {
+                currentAction = StudentAction.Writing;
             }
         }
 
@@ -88,16 +109,11 @@ public class StudentController : MonoBehaviour
 
         switch (studentID)
         {
-            case 1:
-                return Keyboard.current.aKey.isPressed;
-            case 2:
-                return Keyboard.current.sKey.isPressed;
-            case 3:
-                return Keyboard.current.kKey.isPressed;
-            case 4:
-                return Keyboard.current.lKey.isPressed;
-            default:
-                return false;
+            case 1: return Keyboard.current.aKey.isPressed;
+            case 2: return Keyboard.current.sKey.isPressed;
+            case 3: return Keyboard.current.kKey.isPressed;
+            case 4: return Keyboard.current.lKey.isPressed;
+            default: return false;
         }
     }
 
@@ -119,39 +135,29 @@ public class StudentController : MonoBehaviour
         }
     }
 
-    public bool IsCheatingVisible()
-    {
-        return currentAction == StudentAction.Writing || currentAction == StudentAction.Copying;
-    }
-
-    public void GetCaught(bool turnRed)
+    public void GetCaught()
     {
         if (isCaught) return;
 
         isCaught = true;
         currentAction = StudentAction.Caught;
-
-        if (turnRed && sr != null)
-        {
-            if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
-            fadeCoroutine = StartCoroutine(FadeToRed());
-        }
     }
 
-    IEnumerator FadeToRed()
+    public void ShowCelebrate()
     {
-        float t = 0f;
-        Color startColor = sr.color;
-        Color targetColor = Color.red;
+        showCelebrate = true;
+        showSad = false;
+    }
 
-        while (t < caughtColorFadeDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            float normalized = Mathf.Clamp01(t / caughtColorFadeDuration);
-            sr.color = Color.Lerp(startColor, targetColor, normalized);
-            yield return null;
-        }
+    public void ShowSad()
+    {
+        showSad = true;
+        showCelebrate = false;
+    }
 
-        sr.color = targetColor;
+    public void ClearEndExpression()
+    {
+        showCelebrate = false;
+        showSad = false;
     }
 }

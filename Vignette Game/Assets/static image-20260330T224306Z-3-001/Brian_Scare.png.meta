@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 65b6bb02bc9f22447b49395c6cd53633
+guid: 10da4dbc2525cfa4da384bd36bbcc5e7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7443756053782179069
-    second: background_0
+      213: 3284266821931852808
+    second: Brian_Scare_0
+  - first:
+      213: 8305538692837171567
+    second: Brian_Scare_1
+  - first:
+      213: -3399967994516278743
+    second: Brian_Scare_2
+  - first:
+      213: -176010740894397327
+    second: Brian_Scare_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,9 +55,9 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -75,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,23 +122,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: background_0
+      name: Brian_Scare_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 4157
-        height: 2339
+        x: 231
+        y: 3
+        width: 1577
+        height: 2045
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 30356abce4772b890800000000000000
-      internalID: -7443756053782179069
+      spriteID: 80469d4164f049d20800000000000000
+      internalID: 3284266821931852808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Brian_Scare_1
+      rect:
+        serializedVersion: 2
+        x: 1505
+        y: 1853
+        width: 122
+        height: 195
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6162debf63334370800000000000000
+      internalID: 8305538692837171567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Brian_Scare_2
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 1806
+        width: 163
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 922f82f6f13e0d0d0800000000000000
+      internalID: -3399967994516278743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Brian_Scare_3
+      rect:
+        serializedVersion: 2
+        x: 1619
+        y: 1709
+        width: 199
+        height: 108
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17c0658e92fae8df0800000000000000
+      internalID: -176010740894397327
       vertices: []
       indices: 
       edges: []
@@ -138,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 7a9e0fde662dd9c44b1827cd88da4a52
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +223,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      background_0: -7443756053782179069
+      Brian_Scare_0: 3284266821931852808
+      Brian_Scare_1: 8305538692837171567
+      Brian_Scare_2: -3399967994516278743
+      Brian_Scare_3: -176010740894397327
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

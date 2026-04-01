@@ -5,7 +5,10 @@ using System.Collections;
 public class GameManager : MonoBehaviour
 {
     [Header("Students")]
-    public StudentController[] students; // 顺序：0=1号, 1=2号, 2=3号, 3=4号
+    public StudentController[] students; // 0=1号, 1=2号, 2=3号, 3=4号
+
+    [Header("Teacher")]
+    public TeacherController teacherController;
 
     [Header("Start UI")]
     public GameObject startPanel;
@@ -26,7 +29,6 @@ public class GameManager : MonoBehaviour
     [Header("End Timing")]
     public float gameOverPauseDelay = 0.8f;
 
-    // 用来跨场景重载时记住“是不是要自动再开一把”
     private static bool autoStartAfterReload = false;
     private static GameMode reloadMode = GameMode.None;
 
@@ -34,7 +36,6 @@ public class GameManager : MonoBehaviour
     {
         HideAllEndPanels();
 
-        // 如果是 Play Again 触发的重载，就自动进入刚才的模式
         if (autoStartAfterReload && reloadMode != GameMode.None)
         {
             currentMode = reloadMode;
@@ -45,6 +46,11 @@ public class GameManager : MonoBehaviour
 
             gameStarted = true;
             gameEnded = false;
+            ClearAllEndExpressions();
+
+            if (teacherController != null)
+                teacherController.ResetTeacher();
+
             Time.timeScale = 1f;
         }
         else
@@ -54,6 +60,11 @@ public class GameManager : MonoBehaviour
             gameEnded = false;
 
             if (startPanel != null) startPanel.SetActive(true);
+
+            ClearAllEndExpressions();
+
+            if (teacherController != null)
+                teacherController.ResetTeacher();
 
             Time.timeScale = 0f;
         }
@@ -65,6 +76,16 @@ public class GameManager : MonoBehaviour
         if (singleLosePanel != null) singleLosePanel.SetActive(false);
         if (player1WinPanel != null) player1WinPanel.SetActive(false);
         if (player2WinPanel != null) player2WinPanel.SetActive(false);
+    }
+
+    void ClearAllEndExpressions()
+    {
+        if (students == null) return;
+
+        foreach (var s in students)
+        {
+            if (s != null) s.ClearEndExpression();
+        }
     }
 
     public void StartSinglePlayerMode()
@@ -88,6 +109,11 @@ public class GameManager : MonoBehaviour
             startPanel.SetActive(false);
 
         HideAllEndPanels();
+        ClearAllEndExpressions();
+
+        if (teacherController != null)
+            teacherController.ResetTeacher();
+
         Time.timeScale = 1f;
     }
 
@@ -97,22 +123,54 @@ public class GameManager : MonoBehaviour
 
         gameEnded = true;
 
-        foreach (StudentController s in students)
+        if (currentMode == GameMode.SinglePlayer)
         {
-            if (s == null) continue;
-
-            if (s == caughtStudent)
-                s.GetCaught(true);
-            else
-                s.GetCaught(false);
+            foreach (var s in students)
+            {
+                if (s != null) s.GetCaught();
+            }
+        }
+        else if (currentMode == GameMode.TwoPlayer)
+        {
+            ApplyTwoPlayerCaughtLogic(caughtStudent);
         }
 
         StartCoroutine(GameOverSequence(caughtStudent));
     }
 
+    void ApplyTwoPlayerCaughtLogic(StudentController caughtStudent)
+    {
+        if (caughtStudent == null) return;
+
+        int id = caughtStudent.studentID;
+
+        // 1/2组被抓 -> 只记录1/2为caught
+        if (id == 1 || id == 2)
+        {
+            if (students.Length > 0 && students[0] != null) students[0].GetCaught();
+            if (students.Length > 1 && students[1] != null) students[1].GetCaught();
+        }
+        // 3/4组被抓 -> 只记录3/4为caught
+        else if (id == 3 || id == 4)
+        {
+            if (students.Length > 2 && students[2] != null) students[2].GetCaught();
+            if (students.Length > 3 && students[3] != null) students[3].GetCaught();
+        }
+    }
+
     IEnumerator GameOverSequence(StudentController caughtStudent)
     {
-        yield return new WaitForSecondsRealtime(gameOverPauseDelay);
+        // 先让老师闪现到被抓学生前面，演抓到人的动作
+        if (teacherController != null && caughtStudent != null)
+        {
+            yield return StartCoroutine(teacherController.PlayCaughtSequence(caughtStudent));
+        }
+        else
+        {
+            yield return new WaitForSecondsRealtime(gameOverPauseDelay);
+        }
+
+        ApplyEndExpressionsAfterResult();
 
         if (currentMode == GameMode.SinglePlayer)
         {
@@ -142,13 +200,25 @@ public class GameManager : MonoBehaviour
 
     void CheckSinglePlayerFinish()
     {
-        foreach (StudentController s in students)
+        foreach (var s in students)
         {
             if (s != null && s.gameObject.activeSelf && !s.isFinished)
                 return;
         }
 
         gameEnded = true;
+        StartCoroutine(SingleWinSequence());
+    }
+
+    IEnumerator SingleWinSequence()
+    {
+        yield return new WaitForSecondsRealtime(gameOverPauseDelay);
+
+        foreach (var s in students)
+        {
+            if (s != null) s.ShowCelebrate();
+        }
+
         ShowSingleWinPanel();
         Time.timeScale = 0f;
     }
@@ -158,18 +228,79 @@ public class GameManager : MonoBehaviour
         bool player1Finished = IsPlayer1GroupFinished();
         bool player2Finished = IsPlayer2GroupFinished();
 
-        if (player1Finished || player2Finished)
+        if (!player1Finished && !player2Finished) return;
+
+        gameEnded = true;
+        StartCoroutine(TwoPlayerFinishSequence(player1Finished, player2Finished));
+    }
+
+    IEnumerator TwoPlayerFinishSequence(bool player1Finished, bool player2Finished)
+    {
+        yield return new WaitForSecondsRealtime(gameOverPauseDelay);
+
+        if (player1Finished && !player2Finished)
         {
-            gameEnded = true;
+            students[0]?.ShowCelebrate();
+            students[1]?.ShowCelebrate();
+            students[2]?.ShowSad();
+            students[3]?.ShowSad();
+            ShowPlayer1WinPanel();
+        }
+        else if (player2Finished && !player1Finished)
+        {
+            students[2]?.ShowCelebrate();
+            students[3]?.ShowCelebrate();
+            students[0]?.ShowSad();
+            students[1]?.ShowSad();
+            ShowPlayer2WinPanel();
+        }
+        else
+        {
+            students[0]?.ShowCelebrate();
+            students[1]?.ShowCelebrate();
+            students[2]?.ShowCelebrate();
+            students[3]?.ShowCelebrate();
+            ShowPlayer1WinPanel();
+        }
 
-            if (player1Finished && !player2Finished)
-                ShowPlayer1WinPanel();
-            else if (player2Finished && !player1Finished)
-                ShowPlayer2WinPanel();
-            else
-                ShowPlayer1WinPanel(); // 同帧都完成时，先默认玩家1胜
+        Time.timeScale = 0f;
+    }
 
-            Time.timeScale = 0f;
+    void ApplyEndExpressionsAfterResult()
+    {
+        if (currentMode == GameMode.SinglePlayer)
+        {
+            foreach (var s in students)
+            {
+                if (s != null) s.ShowSad();
+            }
+            return;
+        }
+
+        if (currentMode == GameMode.TwoPlayer)
+        {
+            bool leftLost =
+                (students.Length > 0 && students[0] != null && students[0].isCaught) ||
+                (students.Length > 1 && students[1] != null && students[1].isCaught);
+
+            bool rightLost =
+                (students.Length > 2 && students[2] != null && students[2].isCaught) ||
+                (students.Length > 3 && students[3] != null && students[3].isCaught);
+
+            if (leftLost)
+            {
+                students[0]?.ShowSad();
+                students[1]?.ShowSad();
+                students[2]?.ShowCelebrate();
+                students[3]?.ShowCelebrate();
+            }
+            else if (rightLost)
+            {
+                students[2]?.ShowSad();
+                students[3]?.ShowSad();
+                students[0]?.ShowCelebrate();
+                students[1]?.ShowCelebrate();
+            }
         }
     }
 
@@ -177,14 +308,16 @@ public class GameManager : MonoBehaviour
     {
         return students.Length >= 2 &&
                students[0] != null && students[1] != null &&
-               students[0].isFinished && students[1].isFinished;
+               students[0].progress >= students[0].maxProgress &&
+               students[1].progress >= students[1].maxProgress;
     }
 
     bool IsPlayer2GroupFinished()
     {
         return students.Length >= 4 &&
                students[2] != null && students[3] != null &&
-               students[2].isFinished && students[3].isFinished;
+               students[2].progress >= students[2].maxProgress &&
+               students[3].progress >= students[3].maxProgress;
     }
 
     void ShowTwoPlayerCaughtResult(StudentController caughtStudent)
@@ -197,16 +330,10 @@ public class GameManager : MonoBehaviour
 
         int id = caughtStudent.studentID;
 
-        // 1/2 被抓 -> 玩家2赢
         if (id == 1 || id == 2)
-        {
             ShowPlayer2WinPanel();
-        }
-        // 3/4 被抓 -> 玩家1赢
         else if (id == 3 || id == 4)
-        {
             ShowPlayer1WinPanel();
-        }
     }
 
     void ShowSingleWinPanel()
@@ -233,25 +360,19 @@ public class GameManager : MonoBehaviour
         if (player2WinPanel != null) player2WinPanel.SetActive(true);
     }
 
-    // Play Again：重新开始当前模式
     public void PlayAgain()
     {
         Time.timeScale = 1f;
-
         autoStartAfterReload = true;
         reloadMode = currentMode;
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    // Exit：回到开始页面
     public void ExitToStartMenu()
     {
         Time.timeScale = 1f;
-
         autoStartAfterReload = false;
         reloadMode = GameMode.None;
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
