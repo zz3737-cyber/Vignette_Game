@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     [Header("Start UI")]
     public GameObject startPanel;
 
+    [Header("Progress Bars")]
+    public GameObject progressBarsGroup;
+
     [Header("Single Mode Panels")]
     public GameObject singleWinPanel;
     public GameObject singleLosePanel;
@@ -47,6 +50,7 @@ public class GameManager : MonoBehaviour
             gameStarted = true;
             gameEnded = false;
             ClearAllEndExpressions();
+            ShowProgressBars();
 
             if (teacherController != null)
                 teacherController.ResetTeacher();
@@ -62,6 +66,7 @@ public class GameManager : MonoBehaviour
             if (startPanel != null) startPanel.SetActive(true);
 
             ClearAllEndExpressions();
+            HideProgressBars();
 
             if (teacherController != null)
                 teacherController.ResetTeacher();
@@ -88,6 +93,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void HideProgressBars()
+    {
+        if (progressBarsGroup != null)
+            progressBarsGroup.SetActive(false);
+    }
+
+    void ShowProgressBars()
+    {
+        if (progressBarsGroup != null)
+            progressBarsGroup.SetActive(true);
+    }
+
     public void StartSinglePlayerMode()
     {
         currentMode = GameMode.SinglePlayer;
@@ -110,6 +127,7 @@ public class GameManager : MonoBehaviour
 
         HideAllEndPanels();
         ClearAllEndExpressions();
+        ShowProgressBars();
 
         if (teacherController != null)
             teacherController.ResetTeacher();
@@ -171,6 +189,7 @@ public class GameManager : MonoBehaviour
         }
 
         ApplyEndExpressionsAfterResult();
+        HideProgressBars();
 
         if (currentMode == GameMode.SinglePlayer)
         {
@@ -219,6 +238,7 @@ public class GameManager : MonoBehaviour
             if (s != null) s.ShowCelebrate();
         }
 
+        HideProgressBars();
         ShowSingleWinPanel();
         Time.timeScale = 0f;
     }
@@ -244,6 +264,7 @@ public class GameManager : MonoBehaviour
             students[1]?.ShowCelebrate();
             students[2]?.ShowSad();
             students[3]?.ShowSad();
+            HideProgressBars();
             ShowPlayer1WinPanel();
         }
         else if (player2Finished && !player1Finished)
@@ -252,6 +273,7 @@ public class GameManager : MonoBehaviour
             students[3]?.ShowCelebrate();
             students[0]?.ShowSad();
             students[1]?.ShowSad();
+            HideProgressBars();
             ShowPlayer2WinPanel();
         }
         else
@@ -260,6 +282,7 @@ public class GameManager : MonoBehaviour
             students[1]?.ShowCelebrate();
             students[2]?.ShowCelebrate();
             students[3]?.ShowCelebrate();
+            HideProgressBars();
             ShowPlayer1WinPanel();
         }
 

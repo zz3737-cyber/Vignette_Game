@@ -22,6 +22,9 @@ public class TeacherController : MonoBehaviour
     public Vector3 detectVisualLeftLocalPos = new Vector3(-1.8f, -2f, 0f);
     public bool flipDetectVisual = true;
 
+    [Header("Catch Timing")]
+    public float catchDelay = 0.2f;
+
     [Header("Turn Back")]
     public float minTurnInterval = 2f;
     public float maxTurnInterval = 5f;
@@ -48,26 +51,31 @@ public class TeacherController : MonoBehaviour
 
     private Coroutine turnRoutine;
 
+    private StudentController currentSeenStudent = null;
+    private float currentSeenTime = 0f;
+
     void Start()
-    {
-        gameManager = FindObjectOfType<GameManager>();
-        sr = GetComponent<SpriteRenderer>();
+{
+    gameManager = FindObjectOfType<GameManager>();
+    sr = GetComponent<SpriteRenderer>();
 
-        if (sr != null && patrolSprite != null)
-            sr.sprite = patrolSprite;
+    movingRight = Random.value > 0.5f;
+    detectFacingRight = movingRight;
 
-        detectFacingRight = movingRight;
-        UpdateSpriteFacing();
-        UpdateDetectVisual();
+    if (sr != null && patrolSprite != null)
+        sr.sprite = patrolSprite;
 
-        turnRoutine = StartCoroutine(RandomTurnLoop());
-    }
+    UpdateSpriteFacing();
+    UpdateDetectVisual();
+
+    turnRoutine = StartCoroutine(RandomTurnLoop());
+}
 
     void Update()
     {
         if (gameManager == null) return;
 
-        // 每帧都更新，这样你运行时调位置也会立刻生效
+        // 红色检测图每帧都跟着检测方向
         UpdateDetectVisual();
 
         if (gameManager.gameEnded) return;
@@ -82,7 +90,7 @@ public class TeacherController : MonoBehaviour
     {
         if (sr == null) return;
 
-        // 如果方向反了，就改成 sr.flipX = movingRight;
+     
         sr.flipX = !movingRight;
     }
 
@@ -90,7 +98,6 @@ public class TeacherController : MonoBehaviour
     {
         if (detectVisual == null) return;
 
-        // 直接用左右两套独立位置
         detectVisual.localPosition = detectFacingRight
             ? detectVisualRightLocalPos
             : detectVisualLeftLocalPos;
@@ -175,6 +182,8 @@ public class TeacherController : MonoBehaviour
     {
         Vector2 boxCenter = GetDetectBoxCenter();
 
+        StudentController detectedNow = null;
+
         foreach (StudentController student in students)
         {
             if (student == null || student.isCaught || student.isFinished) continue;
@@ -186,9 +195,31 @@ public class TeacherController : MonoBehaviour
 
             if (insideX && insideY && student.IsPressingOwnKey())
             {
-                gameManager.TriggerGameOver(student);
-                return;
+                detectedNow = student;
+                break;
             }
+        }
+
+        if (detectedNow == null)
+        {
+            currentSeenStudent = null;
+            currentSeenTime = 0f;
+            return;
+        }
+
+        if (currentSeenStudent == detectedNow)
+        {
+            currentSeenTime += Time.deltaTime;
+
+            if (currentSeenTime >= catchDelay)
+            {
+                gameManager.TriggerGameOver(detectedNow);
+            }
+        }
+        else
+        {
+            currentSeenStudent = detectedNow;
+            currentSeenTime = 0f;
         }
     }
 
@@ -227,21 +258,25 @@ public class TeacherController : MonoBehaviour
     }
 
     public void ResetTeacher()
-    {
-        isPaused = false;
-        isCaughtSequence = false;
-        movingRight = true;
-        detectFacingRight = movingRight;
+{
+    isPaused = false;
+    isCaughtSequence = false;
 
-        if (sr != null && patrolSprite != null)
-            sr.sprite = patrolSprite;
+    movingRight = Random.value > 0.5f;
+    detectFacingRight = movingRight;
 
-        UpdateSpriteFacing();
-        UpdateDetectVisual();
+    currentSeenStudent = null;
+    currentSeenTime = 0f;
 
-        if (turnRoutine == null)
-            turnRoutine = StartCoroutine(RandomTurnLoop());
-    }
+    if (sr != null && patrolSprite != null)
+        sr.sprite = patrolSprite;
+
+    UpdateSpriteFacing();
+    UpdateDetectVisual();
+
+    if (turnRoutine == null)
+        turnRoutine = StartCoroutine(RandomTurnLoop());
+}
 
     void OnDrawGizmos()
     {

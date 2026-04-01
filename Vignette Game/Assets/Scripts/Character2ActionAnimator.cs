@@ -34,6 +34,11 @@ public class CopyStudentActionAnimator : MonoBehaviour
     public Vector3 celebrateScale = Vector3.one;
     public Vector3 sadScale = Vector3.one;
 
+    [Header("Offsets")]
+    public Vector3 normalOffset = Vector3.zero;
+    public Vector3 celebrateOffset = Vector3.zero;
+    public Vector3 sadOffset = Vector3.zero;
+
     [Header("Frame Rates")]
     public float writingFrameRate = 4f;
     public float cheatingFrameRate = 10f;
@@ -47,17 +52,21 @@ public class CopyStudentActionAnimator : MonoBehaviour
     private float timer = 0f;
     private bool isReversing = false;
 
+    private Vector3 baseLocalPosition;
+
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
 
         if (studentController == null)
             studentController = GetComponent<StudentController>();
+
+        baseLocalPosition = transform.localPosition;
     }
 
     void Start()
     {
-        transform.localScale = normalScale;
+        ApplyNormalTransform();
         SetFirstWritingFrame();
     }
 
@@ -71,19 +80,19 @@ public class CopyStudentActionAnimator : MonoBehaviour
             if (studentController.showSad)
             {
                 if (sadSprite != null) sr.sprite = sadSprite;
-                transform.localScale = sadScale;
+                ApplySadTransform();
                 return;
             }
 
             if (studentController.showCelebrate)
             {
                 if (celebrateSprite != null) sr.sprite = celebrateSprite;
-                transform.localScale = celebrateScale;
+                ApplyCelebrateTransform();
                 return;
             }
         }
 
-        transform.localScale = normalScale;
+        ApplyNormalTransform();
 
         bool selfPressed = IsKeyPressed(selfKey);
         AnimState targetState = selfPressed ? AnimState.Cheating : AnimState.Writing;
@@ -104,6 +113,24 @@ public class CopyStudentActionAnimator : MonoBehaviour
             case InputKey.L: return Keyboard.current.lKey.isPressed;
             default: return false;
         }
+    }
+
+    void ApplyNormalTransform()
+    {
+        transform.localScale = normalScale;
+        transform.localPosition = baseLocalPosition + normalOffset;
+    }
+
+    void ApplyCelebrateTransform()
+    {
+        transform.localScale = celebrateScale;
+        transform.localPosition = baseLocalPosition + celebrateOffset;
+    }
+
+    void ApplySadTransform()
+    {
+        transform.localScale = sadScale;
+        transform.localPosition = baseLocalPosition + sadOffset;
     }
 
     void UpdateState(AnimState targetState)
